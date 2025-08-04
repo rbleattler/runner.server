@@ -161,6 +161,16 @@ namespace Runner.Client
             {
                 throw new NotImplementedException();
             }
+
+            public Task<TaskAgent> UpdateAgentUpdateStateAsync(int agentPoolId, ulong agentId, string currentState, string trace, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<string> RefreshRunnerConfigAsync(int agentId, string configType, string encodedRunnerConfig, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -185,7 +185,8 @@ namespace GitHub.Runner.Worker
             if(!File.Exists(file)) {
                 executionContext.Write("", $"{file} executable not found locally");
                 Dictionary<string, Func<string, Task>> _tools = null;
-                if(name == "node12") {
+                if (name == "node12")
+                {
                     string nodeUrl = "https://nodejs.org/dist";
                     string nodeUnofficialUrl = "https://unofficial-builds.nodejs.org/download/release";
                     string nodeVersion = "12.13.1";
@@ -201,7 +202,9 @@ namespace GitHub.Runner.Worker
                         { "osx/amd64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "darwin", "x64", "tar.gz"), dest, tarextraopts, true)},
                     };
 
-                } else if(name == "node16") {
+                }
+                else if (name == "node16")
+                {
                     string nodeUrl = "https://nodejs.org/dist";
                     string nodeUnofficialUrl = "https://unofficial-builds.nodejs.org/download/release";
                     string nodeVersion = "16.20.1";
@@ -218,7 +221,9 @@ namespace GitHub.Runner.Worker
                         { "osx/arm64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "darwin", "arm64", "tar.gz"), dest, tarextraopts, true)},
                     };
 
-                } else if(name == "node20") {
+                }
+                else if (name == "node20")
+                {
                     string nodeUrl = "https://nodejs.org/dist";
                     string nodeUnofficialUrl = "https://unofficial-builds.nodejs.org/download/release";
                     string nodeVersion = "20.5.0";
@@ -234,21 +239,39 @@ namespace GitHub.Runner.Worker
                         { "osx/amd64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "darwin", "x64", "tar.gz"), dest, tarextraopts, true)},
                         { "osx/arm64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "darwin", "arm64", "tar.gz"), dest, tarextraopts, true)},
                     };
-                } else if(name == "node12_alpine") {
+                } else if(name == "node24") {
+                    string nodeUrl = "https://nodejs.org/dist";
+                    string nodeVersion = "24.4.0";
+                    string tarextraopts = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) ? " --exclude \"*/lib/*\" \"*/bin/node*\" \"*/LICENSE\"" : "";
+                    _tools = new Dictionary<string, Func<string, Task>> {
+                        { "windows/amd64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "win", "x64", "zip"), Path.Combine(dest, "bin"), unwrap: true)},
+                        { "windows/arm64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "win", "arm64", "zip"), Path.Combine(dest, "bin"), unwrap: true)},
+                        { "linux/amd64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "linux", "x64", "tar.gz"), dest, tarextraopts, true)},
+                        { "linux/arm64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "linux", "arm64", "tar.gz"), dest, tarextraopts, true)},
+                        { "osx/amd64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "darwin", "x64", "tar.gz"), dest, tarextraopts, true)},
+                        { "osx/arm64", dest => DownloadTool(executionContext, NodeOfficialUrl(nodeUrl, nodeVersion, "darwin", "arm64", "tar.gz"), dest, tarextraopts, true)},
+                    };
+                }
+                else if (name == "node12_alpine")
+                {
                     string nodeVersion = "12.13.1";
                     _tools = new Dictionary<string, Func<string, Task>> {
                         { "linux/amd64", dest => DownloadTool(executionContext, $"https://vstsagenttools.blob.core.windows.net/tools/nodejs/{nodeVersion}/alpine/x64/node-{nodeVersion}-alpine-x64.tar.gz", dest)},
                         { "linux/arm", dest => DownloadTool(executionContext, "https://github.com/ChristopherHX/node_alpine_arm/releases/download/v1.1918136754.1/node-12-alpine3.10-arm.tar.gz", dest)},
                         { "linux/arm64", dest => DownloadTool(executionContext, "https://github.com/ChristopherHX/node_alpine_arm/releases/download/v1.1918136754.1/node-12-alpine3.10-arm64.tar.gz", dest)},
                     };
-                } else if(name == "node16_alpine") {
+                }
+                else if (name == "node16_alpine")
+                {
                     string nodeVersion = "16.20.1";
                     _tools = new Dictionary<string, Func<string, Task>> {
                         { "linux/amd64", dest => DownloadTool(executionContext, $"https://vstsagenttools.blob.core.windows.net/tools/nodejs/{nodeVersion}/alpine/x64/node-v{nodeVersion}-alpine-x64.tar.gz", dest)},
                         { "linux/arm", dest => DownloadTool(executionContext, "https://github.com/ChristopherHX/node_alpine_arm/releases/download/v1.1918136754.1/node-16-alpine3.11-arm.tar.gz", dest)},
                         { "linux/arm64", dest => DownloadTool(executionContext, "https://github.com/ChristopherHX/node_alpine_arm/releases/download/v1.1918136754.1/node-16-alpine3.11-arm64.tar.gz", dest)},
                     };
-                } else if(name == "node20_alpine") {
+                }
+                else if (name == "node20_alpine")
+                {
                     string nodeVersion = "20.5.0";
                     _tools = new Dictionary<string, Func<string, Task>> {
                         { "linux/amd64", dest => DownloadTool(executionContext, $"https://vstsagenttools.blob.core.windows.net/tools/nodejs/{nodeVersion}/alpine/x64/node-v{nodeVersion}-alpine-x64.tar.gz", dest)},
@@ -256,13 +279,25 @@ namespace GitHub.Runner.Worker
                         { "linux/arm64", dest => DownloadTool(executionContext, "https://github.com/ChristopherHX/node_alpine_arm/releases/download/v1.5822236100.1/node-20-alpine3.16-arm64.tar.gz", dest)},
                     };
                 }
-                if(_tools.TryGetValue(platform, out Func<string, Task> download)) {
+                else if (name == "node24_alpine")
+                {
+                    string nodeVersion = "24.4.0";
+                    _tools = new Dictionary<string, Func<string, Task>> {
+                        { "linux/amd64", dest => DownloadTool(executionContext, $"https://github.com/actions/alpine_nodejs/releases/download/v{nodeVersion}/node-v{nodeVersion}-alpine-x64.tar.gz", dest)},
+                        { "linux/arm64", dest => DownloadTool(executionContext, "https://github.com/ChristopherHX/node_alpine_arm/releases/download/v1.16732897155.1/node-24.4.0-alpine3.21-arm64.tar.gz", dest)},
+                    };
+                }
+                if (_tools.TryGetValue(platform, out Func<string, Task> download))
+                {
                     await download(Path.Combine(externalsPath, name));
-                    if(!File.Exists(file)) {
+                    if (!File.Exists(file))
+                    {
                         throw new Exception("node executable, not found after download");
                     }
                     executionContext.Write("", "node executable downloaded, continue workflow");
-                } else {
+                }
+                else
+                {
                     throw new Exception("Failed to get node executable");
                 }
             }

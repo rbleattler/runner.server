@@ -141,6 +141,11 @@ namespace Runner.Client
                 throw new NotImplementedException();
             }
 
+            public Task<string> RefreshRunnerConfigAsync(int agentId, string configType, string encodedRunnerConfig, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+
             public Task<TaskAgentJobRequest> RenewAgentRequestAsync(int poolId, long requestId, Guid lockToken, string orchestrationId, CancellationToken cancellationToken)
             {
                 return Task.FromResult(new TaskAgentJobRequest());
@@ -157,6 +162,11 @@ namespace Runner.Client
             }
 
             public Task<TaskAgent> UpdateAgentUpdateStateAsync(int agentPoolId, ulong agentId, string currentState, string trace)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<TaskAgent> UpdateAgentUpdateStateAsync(int agentPoolId, ulong agentId, string currentState, string trace, CancellationToken cancellationToken = default)
             {
                 throw new NotImplementedException();
             }

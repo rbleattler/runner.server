@@ -50,8 +50,11 @@ namespace GitHub.Runner.Worker
             if (message.Variables.TryGetValue(Constants.Variables.System.OrchestrationId, out VariableValue orchestrationId) &&
                 !string.IsNullOrEmpty(orchestrationId.Value))
             {
-                // make the orchestration id the first item in the user-agent header to avoid get truncated in server log.
-                HostContext.UserAgents.Insert(0, new ProductInfoHeaderValue("OrchestrationId", orchestrationId.Value));
+                if (!HostContext.UserAgents.Any(x => string.Equals(x.Product?.Name, "OrchestrationId", StringComparison.OrdinalIgnoreCase)))
+                {
+                    // make the orchestration id the first item in the user-agent header to avoid get truncated in server log.
+                    HostContext.UserAgents.Insert(0, new ProductInfoHeaderValue("OrchestrationId", orchestrationId.Value));
+                }
 
                 // make sure orchestration id is in the user-agent header.
                 VssUtil.InitializeVssClientSettings(HostContext.UserAgents, HostContext.WebProxy);
@@ -318,8 +321,22 @@ namespace GitHub.Runner.Worker
             {
                 try
                 {
-                    await runServer.CompleteJobAsync(message.Plan.PlanId, message.JobId, result, jobContext.JobOutputs, jobContext.Global.StepsResult, jobContext.Global.JobAnnotations, environmentUrl, telemetry, default);
+                    await runServer.CompleteJobAsync(message.Plan.PlanId, message.JobId, result, jobContext.JobOutputs, jobContext.Global.StepsResult, jobContext.Global.JobAnnotations, environmentUrl, telemetry, billingOwnerId: message.BillingOwnerId, default);
                     return result;
+                }
+                catch (VssUnauthorizedException ex)
+                {
+                    Trace.Error($"Catch exception while attempting to complete job {message.JobId}, job request {message.RequestId}.");
+                    Trace.Error(ex);
+                    exceptions.Add(ex);
+                    break;
+                }
+                catch (TaskOrchestrationJobNotFoundException ex)
+                {
+                    Trace.Error($"Catch exception while attempting to complete job {message.JobId}, job request {message.RequestId}.");
+                    Trace.Error(ex);
+                    exceptions.Add(ex);
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -511,7 +528,7 @@ namespace GitHub.Runner.Worker
 
                     if (result == TaskResult.Failed && warnOnFailedJob)
                     {
-                        jobContext.Warning($"This job failure may be caused by using an out of date self-hosted runner. You are currently using runner version {currentVersion}. Please update to the latest version {serverPackages[0].Version}");
+                        jobContext.Warning($"This job failure may be caused by using an out of date version of GitHub runner on your self-hosted runner. You are currently using GitHub runner version {currentVersion}. Please update to the latest version {serverPackages[0].Version}");
                     }
                     else if (warnOnOldRunnerVersion)
                     {

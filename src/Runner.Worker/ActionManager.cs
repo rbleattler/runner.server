@@ -699,7 +699,8 @@ namespace GitHub.Runner.Worker
                 {
                     if (MessageUtil.IsRunServiceJob(executionContext.Global.Variables.Get(Constants.Variables.System.JobRequestType)))
                     {
-                        actionDownloadInfos = await launchServer.ResolveActionsDownloadInfoAsync(executionContext.Global.Plan.PlanId, executionContext.Root.Id, new WebApi.ActionReferenceList { Actions = actionReferences }, executionContext.CancellationToken);
+                        var displayHelpfulActionsDownloadErrors = executionContext.Global.Variables.GetBoolean(Constants.Runner.Features.DisplayHelpfulActionsDownloadErrors) ?? false;
+                        actionDownloadInfos = await launchServer.ResolveActionsDownloadInfoAsync(executionContext.Global.Plan.PlanId, executionContext.Root.Id, new WebApi.ActionReferenceList { Actions = actionReferences }, executionContext.CancellationToken, displayHelpfulActionsDownloadErrors);
                     }
                     else
                     {
@@ -786,7 +787,19 @@ namespace GitHub.Runner.Worker
                 // make sure we get a clean folder ready to use.
                 IOUtil.DeleteDirectory(destDirectory, executionContext.CancellationToken);
                 Directory.CreateDirectory(destDirectory);
-                executionContext.Output($"Download action repository '{downloadInfo.NameWithOwner}@{downloadInfo.Ref}' (SHA:{downloadInfo.ResolvedSha})");
+
+                if (downloadInfo.PackageDetails != null) 
+                {
+                    executionContext.Output($"##[group]Download immutable action package '{downloadInfo.NameWithOwner}@{downloadInfo.Ref}'");
+                    executionContext.Output($"Version: {downloadInfo.PackageDetails.Version}");
+                    executionContext.Output($"Digest: {downloadInfo.PackageDetails.ManifestDigest}");
+                    executionContext.Output($"Source commit SHA: {downloadInfo.ResolvedSha}");
+                    executionContext.Output("##[endgroup]");
+                } 
+                else 
+                {
+                    executionContext.Output($"Download action repository '{downloadInfo.NameWithOwner}@{downloadInfo.Ref}' (SHA:{downloadInfo.ResolvedSha})");
+                }
             }
 
             //download and extract action in a temp folder and rename it on success
